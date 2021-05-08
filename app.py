@@ -16,10 +16,6 @@ import whois
 app = Flask(__name__)
 model = pickle.load(open('SVM_Model.pkl', 'rb'))
 
-@app.route('/')
-def home():
-    return render_template('use.html')
-
 # 2.Checks for IP address in URL (Have_IP)
 def havingIP(url):
   try:
@@ -271,13 +267,20 @@ def featureExtraction(url):
   
   return features
 
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/contact')
+def contact():
+  return render_template("contact.html")
+
+@app.route('/use')
+def use():
+  return render_template("use.html")
+
 @app.route('/predict',methods=['POST'])
 def predict():
-
-    if request.method == 'POST':
-        url = request.form["input_url"]
-    
-
     features=featureExtraction(url)
     if features.count(0)==15:
       prediction=0
