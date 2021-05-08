@@ -14,7 +14,7 @@ import numpy as np
 import whois
 
 app = Flask(__name__)
-model = pickle.load(open('/home/sarwesh/Desktop/Tutorial/CPP/Machine learning/Website/templates/SVM_Model.pkl', 'rb'))
+model = pickle.load(open('/templates/SVM_Model.pkl', 'rb'))
 
 @app.route('/')
 def home():
