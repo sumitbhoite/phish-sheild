@@ -8,3 +8,4 @@ SVC
 sklearn
 numpy
 python-whois
+bs4
