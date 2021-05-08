@@ -10,3 +10,4 @@ numpy
 python-whois
 bs4
 gunicorn==20.1.0
+requests
