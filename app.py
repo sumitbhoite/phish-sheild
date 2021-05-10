@@ -281,6 +281,7 @@ def use():
 
 @app.route('/predict',methods=['POST'])
 def predict():
+    url=request.form.get("input_url")
     features=featureExtraction(url)
     if features.count(0)==15:
       prediction=0
@@ -289,9 +290,9 @@ def predict():
     else:
       prediction = model.predict([features])
     if prediction==0:
-      return render_template('use.html', prediction_text='Website is safe')
+      return render_template('use.html', prediction_text="Website is safe")
     else:
-      return render_template('use.html', prediction_text='Website is Phishing')
+        return render_template('use.html', prediction_text="Website is Phishing")
 
 '''@app.route('/results',methods=['POST'])
 ef results():
