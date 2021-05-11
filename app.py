@@ -295,13 +295,12 @@ def predict():
         return render_template('use.html', prediction_text="Website is Phishing")
 
 @app.route('/results',methods=['POST'])
-ef results():
+def results():
 
     data = request.get_json(force=True)
     prediction = model.predict([np.array(list(data.values()))])
 
     output = prediction[0]
     return jsonify(output)
-'''
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True)'''
