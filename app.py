@@ -269,9 +269,9 @@ def featureExtraction(url):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return "Hello Android"
 
-@app.route('/contact')
+'''@app.route('/contact')
 def contact():
   return render_template("contact.html")
 
@@ -294,7 +294,7 @@ def predict():
     else:
         return render_template('use.html', prediction_text="Website is Phishing")
 
-'''@app.route('/results',methods=['POST'])
+@app.route('/results',methods=['POST'])
 ef results():
 
     data = request.get_json(force=True)
