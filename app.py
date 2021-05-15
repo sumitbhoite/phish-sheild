@@ -251,6 +251,7 @@ def home():
 
 @app.route('/post',methods=['POST'])
 def predict():
+  return "Hello Post"
   url=request.form['URL']
   features=featureExtraction(url)
   if features.count(0)==15:
