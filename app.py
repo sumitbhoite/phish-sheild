@@ -240,8 +240,7 @@ def featureExtraction(url):
     response = ""
 
   features.append(iframe(response))
-  features.append(mouseOver(reponse))
-  #features.append(rightClick(response))
+  features.append(mouseOver(response))
   features.append(forwarding(response))
 
   return features
