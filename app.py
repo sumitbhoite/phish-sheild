@@ -178,7 +178,11 @@ def domainEnd(domain_name):
   return end
 
 # 15. IFrame Redirection (iFrame)
-def iframe(response):
+def iframe(url):
+  try:
+    response = requests.get(url)
+  except:
+    response = ""
   if response == "":
       return 1
   else:
@@ -189,7 +193,11 @@ def iframe(response):
         return 1
 
 # 16.Checks the effect of mouse over on status bar (Mouse_Over)
-def mouseOver(response):
+def mouseOver(url):
+  try:
+    response = requests.get(url)
+  except:
+    response = ""
   if response == "" :
     return 1
   else:
@@ -255,8 +263,8 @@ def featureExtraction(url):
   except:
     response = ""
 
-  features.append(iframe(response))
-  features.append(mouseOver(response))
+  features.append(iframe(url))
+  features.append(mouseOver(url))
   #features.append(rightClick(response))
   features.append(forwarding(url))
 
