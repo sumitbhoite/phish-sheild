@@ -247,30 +247,22 @@ def featureExtraction(url):
 
 @app.route('/',methods=["GET","POST"])
 def home():
-    return render_template("index.html")
+    return "Hello World"
 
-@app.route('/contact')
-def contact():
-  return render_template("contact.html")
-
-@app.route('/use')
-def use():
-  return render_template("use.html")
-
-@app.route('/predict',methods=['POST'])
+@app.route('/post',methods=['POST'])
 def predict():
-    url=request.form.get("input_url")
-    features=featureExtraction(url)
-    if features.count(0)==15:
-      prediction=0
-    elif features.count(0)==14:
-      prediction=0
-    else:
-      prediction = model.predict([features])
-    if prediction==0:
-      return render_template('use.html', prediction_text="Website is safe")
-    else:
-        return render_template('use.html', prediction_text="Website is Phishing")
+  url=request.form['URL']
+  features=featureExtraction(url)
+  if features.count(0)==15:
+    prediction=0
+  elif features.count(0)==14:
+    prediction=0
+  else:
+    prediction = model.predict([features])
+  if prediction==0:
+    return "Website is safe"
+  else:
+    return "Website is Phishing"
 
 if __name__ == "__main__":
     app.run(debug=True)
