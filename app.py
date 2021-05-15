@@ -251,8 +251,7 @@ def home():
 
 @app.route('/post',methods=['POST'])
 def predict():
-  return "Hello Post"
-  '''url=request.form['URL']
+  url=request.form['URL']
   features=featureExtraction(url)
   if features.count(0)==15:
     prediction=0
@@ -264,7 +263,7 @@ def predict():
     return "Website is safe"
   else:
     return "Website is Phishing"
-    '''
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
