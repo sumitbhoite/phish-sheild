@@ -179,50 +179,26 @@ def domainEnd(domain_name):
 
 # 15. IFrame Redirection (iFrame)
 def iframe(url):
-  try:
-    response = requests.get(url)
-  except:
-    response = ""
   if response == "":
       return 1
   else:
-      soup = BeautifulSoup(response, "lxml")
-      if str(soup.iframe).lower().find("frameborder") == -1:
-        return 0
+      if re.findall(r"[<iframe>|<frameBorder>]", response.text):
+          return 0
       else:
-        return 1
+          return 1
 
 # 16.Checks the effect of mouse over on status bar (Mouse_Over)
 def mouseOver(url):
-  try:
-    response = requests.get(url)
-  except:
-    response = ""
   if response == "" :
     return 1
   else:
-    soup = BeautifulSoup(response, "lxml")
-    if str(soup).lower().find('onmouseover="window.status') != -1:
+    if re.findall("<script>.+onmouseover.+</script>", response.text):
       return 1
     else:
       return 0
-
-# 17.Checks the status of the right click attribute (Right_Click)
-def rightClick(response):
-  if response == "":
-    return 1
-  else:
-    if re.findall(r"event.button ?== ?2", response.text):
-      return 0
-    else:
-      return 1
 
 # 18.Checks the number of forwardings (Web_Forwards)
 def forwarding(url):
-  try:
-    response = requests.get(url)
-  except:
-    response = ""
   if response == "":
     return 1
   else:
@@ -259,14 +235,14 @@ def featureExtraction(url):
 
   # HTML & Javascript based features
   try:
-    response = requests.get(url).text
+    response = requests.get(url)
   except:
     response = ""
 
-  features.append(iframe(url))
-  features.append(mouseOver(url))
+  features.append(iframe(respponse))
+  features.append(mouseOver(reponse))
   #features.append(rightClick(response))
-  features.append(forwarding(url))
+  features.append(forwarding(response))
 
   return features
 
