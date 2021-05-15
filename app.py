@@ -9,21 +9,37 @@ import urllib
 import urllib.request
 from datetime import datetime
 import requests
-import pickle
 import numpy as np
 import whois
+import tldextract
+import string
+import datetime
+from dateutil.relativedelta import relativedelta
 
 app = Flask(__name__)
 model = pickle.load(open('SVM_Model.pkl', 'rb'))
 
 # 2.Checks for IP address in URL (Have_IP)
 def havingIP(url):
-  try:
-    ipaddress.ip_address(url)
-    ip = 1
-  except:
-    ip = 0
-  return ip
+  index = url.find("://")
+  split_url = url[index+3:]
+  # print(split_url)
+  index = split_url.find("/")
+  split_url = split_url[:index]
+  # print(split_url)
+  split_url = split_url.replace(".", "")
+  # print(split_url)
+  counter_hex = 0
+  for i in split_url:
+    if i in string.hexdigits:
+      counter_hex +=1
+
+  total_len = len(split_url)
+  having_IP_Address = 0
+  if counter_hex >= total_len:
+    having_IP_Address = 1
+
+  return having_IP_Address
 
 # 3.Checks the presence of @ in URL (Have_At)
 sc=['@','~','`','!', '$','%','&']
@@ -41,9 +57,9 @@ def haveAtSign(url):
 # 4.Finding the length of URL and categorizing (URL_Length)
 def getLength(url):
   if len(url) < 54:
-    length = 0            
+    length = 0
   else:
-    length = 1            
+    length = 1
   return length
 
 # 5.Gives number of '/' in URL (URL_Depth)
@@ -106,63 +122,36 @@ def prefixSuffix(url):
 
 # 12.Web traffic (Web_Traffic)
 def web_traffic(url):
+    try:
+      extract_res = tldextract.extract(url)
+      url_ref = extract_res.domain + "." + extract_res.suffix
+      html_content = requests.get("https://www.alexa.com/siteinfo/" + url_ref).text
+      soup = BeautifulSoup(html_content, "lxml")
+      value = str(soup.find('div', {'class': "rankmini-rank"}))[42:].split("\n")[0].replace(",", "")
+      if not value.isdigit():
+        return 1
+      value = int(value)
+      if value < 100000:
+        return 0
+      else:
+        return 1
+    except:
+        return 1
+
+# 13.Survival time of domain: The difference between termination time and creation time (Domain_Age)
+def domainAge(url):
+  extract_res = tldextract.extract(url)
+  url_ref = extract_res.domain + "." + extract_res.suffix
   try:
-    #Filling the whitespaces in the URL if any
-    url = urllib.parse.quote(url)
-    rank = BeautifulSoup(urllib.request.urlopen("http://data.alexa.com/data?cli=10&dat=s&url=" + url).read(), "xml").find(
-        "REACH")['RANK']
-    rank = int(rank)
+    whois_res = whois.whois(url)
+    if datetime.datetime.now() > whois_res["creation_date"][0] + relativedelta(months=+6):
+      return 0
+    else:
+      return 1
   except:
     return 1
-  if rank <100000:
-    return 0
-  else:
-    return 1
 
-# 13.Survival time of domain: The difference between termination time and creation time (Domain_Age)  
-def domainAge(domain_name):
-  creation_date = domain_name.creation_date
-  expiration_date = domain_name.expiration_date
-  if (isinstance(creation_date,str) or isinstance(expiration_date,str)):
-      try:
-        creation_date = datetime.strptime(creation_date,'%Y-%m-%d')
-        expiration_date = datetime.strptime(expiration_date,"%Y-%m-%d")
-      except:
-        age=1
-  if ((expiration_date is None) or (creation_date is None)):
-      age=1
-  elif ((type(expiration_date) is list) or (type(creation_date) is list)):
-    try:
-      if (type(expiration_date) is list and type(creation_date) is list):
-        ageofdomain = abs((expiration_date[0]- creation_date[0]).days)
-        if ((ageofdomain/30) < 6):
-          age = 1
-        else:
-          age = 0
-      elif (type(expiration_date) is list):
-        ageofdomain = abs((expiration_date[0]- creation_date).days)
-        if ((ageofdomain/30) < 6):
-          age = 1
-        else:
-          age = 0
-      else:
-        ageofdomain = abs((expiration_date- creation_date[0]).days)
-        if ((ageofdomain/30) < 6):
-          age = 1
-        else:
-          age = 0
-    except:
-      age=1
-
-  else:
-      ageofdomain = abs((expiration_date - creation_date).days)
-      if ((ageofdomain/30) < 6):
-        age = 1
-      else:
-        age = 0
-  return age
-
-# 14.End time of domain: The difference between termination time and current time (Domain_End) 
+# 14.End time of domain: The difference between termination time and current time (Domain_End)
 def domainEnd(domain_name):
   expiration_date = domain_name.expiration_date
   if isinstance(expiration_date,str):
@@ -173,14 +162,14 @@ def domainEnd(domain_name):
   if (expiration_date is None):
       end=1
   elif (type(expiration_date) is list):
-      today = datetime.now()
+      today = datetime.datetime.now()
       domainDate = abs((expiration_date[0] - today).days)
       if ((domainDate/30) < 6):
         end = 1
       else:
         end=0
   else:
-      today = datetime.now()
+      today = datetime.datetime.now()
       domainDate = abs((expiration_date - today).days)
       if ((domainDate/30) < 6):
         end = 1
@@ -193,17 +182,19 @@ def iframe(response):
   if response == "":
       return 1
   else:
-      if re.findall(r"[<iframe>|<frameBorder>]", response.text):
-          return 0
+      soup = BeautifulSoup(response, "lxml")
+      if str(soup.iframe).lower().find("frameborder") == -1:
+        return 0
       else:
-          return 1
+        return 1
 
 # 16.Checks the effect of mouse over on status bar (Mouse_Over)
-def mouseOver(response): 
+def mouseOver(response):
   if response == "" :
     return 1
   else:
-    if re.findall("<script>.+onmouseover.+</script>", response.text):
+    soup = BeautifulSoup(response, "lxml")
+    if str(soup).lower().find('onmouseover="window.status') != -1:
       return 1
     else:
       return 0
@@ -218,8 +209,12 @@ def rightClick(response):
     else:
       return 1
 
-# 18.Checks the number of forwardings (Web_Forwards)    
-def forwarding(response):
+# 18.Checks the number of forwardings (Web_Forwards)
+def forwarding(url):
+  try:
+    response = requests.get(url)
+  except:
+    response = ""
   if response == "":
     return 1
   else:
@@ -241,7 +236,7 @@ def featureExtraction(url):
   features.append(httpDomain(url))
   features.append(tinyURL(url))
   features.append(prefixSuffix(url))
-  
+
   #Domain based features (4)
   dns = 0
   try:
@@ -251,27 +246,27 @@ def featureExtraction(url):
 
   features.append(dns)
   features.append(web_traffic(url))
-  features.append(1 if dns == 1 else domainAge(domain_name))
+  features.append(1 if dns == 1 else domainAge(url))
   features.append(1 if dns == 1 else domainEnd(domain_name))
-  
+
   # HTML & Javascript based features
   try:
-    response = requests.get(url)
+    response = requests.get(url).text
   except:
     response = ""
 
   features.append(iframe(response))
   features.append(mouseOver(response))
   #features.append(rightClick(response))
-  features.append(forwarding(response))
-  
+  features.append(forwarding(url))
+
   return features
 
-@app.route('/')
+@app.route('/',methods=["GET","POST"])
 def home():
-    return "Hello Android"
+    return render_template("index.html")
 
-'''@app.route('/contact')
+@app.route('/contact')
 def contact():
   return render_template("contact.html")
 
@@ -294,13 +289,5 @@ def predict():
     else:
         return render_template('use.html', prediction_text="Website is Phishing")
 
-@app.route('/results',methods=['POST'])
-def results():
-
-    data = request.get_json(force=True)
-    prediction = model.predict([np.array(list(data.values()))])
-
-    output = prediction[0]
-    return jsonify(output)
 if __name__ == "__main__":
-    app.run(debug=True)'''
+    app.run(debug=True)
