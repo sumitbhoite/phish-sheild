@@ -178,7 +178,7 @@ def domainEnd(domain_name):
   return end
 
 # 15. IFrame Redirection (iFrame)
-def iframe(url):
+def iframe(response):
   if response == "":
       return 1
   else:
@@ -188,7 +188,7 @@ def iframe(url):
           return 1
 
 # 16.Checks the effect of mouse over on status bar (Mouse_Over)
-def mouseOver(url):
+def mouseOver(response):
   if response == "" :
     return 1
   else:
@@ -198,7 +198,7 @@ def mouseOver(url):
       return 0
 
 # 18.Checks the number of forwardings (Web_Forwards)
-def forwarding(url):
+def forwarding(response):
   if response == "":
     return 1
   else:
