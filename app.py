@@ -267,14 +267,14 @@ def home():
 
 @app.route('/post',methods=['POST'])
 def predict():
-  url=request.form['input_url']
+  url=request.form['URL']
   dataPhish=0
   if checkCSV(url)==0:
     dataPhish=0
   else:
     dataPhish=1
   if dataPhish==0:
-    return render_template("use.html",prediction_text="It is Surely Safe")
+    return "It is Surely Safe"
   else:
     features=featureExtraction(url)
   if features.count(0)==15 or features.count(0)==14:
