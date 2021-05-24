@@ -15,6 +15,7 @@ import tldextract
 import string
 import datetime
 from dateutil.relativedelta import relativedelta
+from csv import reader
 
 app = Flask(__name__)
 model = pickle.load(open('SVM_Model.pkl', 'rb'))
@@ -23,22 +24,17 @@ model = pickle.load(open('SVM_Model.pkl', 'rb'))
 def havingIP(url):
   index = url.find("://")
   split_url = url[index+3:]
-  # print(split_url)
   index = split_url.find("/")
   split_url = split_url[:index]
-  # print(split_url)
   split_url = split_url.replace(".", "")
-  # print(split_url)
   counter_hex = 0
   for i in split_url:
     if i in string.hexdigits:
       counter_hex +=1
-
   total_len = len(split_url)
   having_IP_Address = 0
   if counter_hex >= total_len:
     having_IP_Address = 1
-
   return having_IP_Address
 
 # 3.Checks the presence of @ in URL (Have_At)
@@ -207,6 +203,26 @@ def forwarding(response):
     else:
       return 1
 
+#16. Extra feature checks url exists in popular websites data
+def checkCSV(url):
+  flag=0
+  try:
+    checkURL=urlparse(url).netloc
+  except:
+    return 1
+  with open('/home/sarwesh/Desktop/Tutorial/CPP/Machine learning/Website/templates/Web_Scrapped_websites.csv', 'r') as read_obj:
+    csv_reader = reader(read_obj)
+    for row in csv_reader:
+        if row[0]==checkURL:
+            flag=0
+            break
+        else:
+            flag=1
+  if flag==0:
+      return 0
+  else:
+      return 1
+
 def featureExtraction(url):
 
   features = []
@@ -251,19 +267,23 @@ def home():
 
 @app.route('/post',methods=['POST'])
 def predict():
-  url=request.form['URL']
-  features=featureExtraction(url)
-  if features.count(0)==15:
-    prediction=0
-  elif features.count(0)==14:
+  url=request.form['input_url']
+  dataPhish=0
+  if checkCSV(url)==0:
+    dataPhish=0
+  else:
+    dataPhish=1
+  if dataPhish==0:
+    return render_template("use.html",prediction_text="It is Surely Safe")
+  else:
+    features=featureExtraction(url)
+  if features.count(0)==15 or features.count(0)==14:
     prediction=0
   else:
     prediction = model.predict([features])
-  if prediction==0:
-    return "Website is safe"
+  if prediction==1 and dataPhish==1:
+    return "Surely Phishing"
   else:
-    return "Website is Phishing"
-    
-
+    return "Little Doubtful 70% Safe"
 if __name__ == "__main__":
     app.run(debug=True)
