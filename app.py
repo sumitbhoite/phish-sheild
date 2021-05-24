@@ -210,7 +210,7 @@ def checkCSV(url):
     checkURL=urlparse(url).netloc
   except:
     return 1
-  with open('/home/sarwesh/Desktop/Tutorial/CPP/Machine learning/Website/templates/Web_Scrapped_websites.csv', 'r') as read_obj:
+  with open('Web_Scrapped_websites.csv', 'r') as read_obj:
     csv_reader = reader(read_obj)
     for row in csv_reader:
         if row[0]==checkURL:
