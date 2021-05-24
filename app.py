@@ -274,7 +274,7 @@ def predict():
   else:
     dataPhish=1
   if dataPhish==0:
-    return "It is Surely Safe"
+    return "0"
   else:
     features=featureExtraction(url)
   if features.count(0)==15 or features.count(0)==14:
@@ -282,8 +282,8 @@ def predict():
   else:
     prediction = model.predict([features])
   if prediction==1 and dataPhish==1:
-    return "Surely Phishing"
+    return "-1"
   else:
-    return "Little Doubtful 70% Safe"
+    return "1"
 if __name__ == "__main__":
     app.run(debug=True)
