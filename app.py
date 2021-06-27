@@ -16,8 +16,10 @@ import string
 import datetime
 from dateutil.relativedelta import relativedelta
 from csv import reader
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 model = pickle.load(open('SVM_Model.pkl', 'rb'))
 
 # 2.Checks for IP address in URL (Have_IP)
