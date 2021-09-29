@@ -268,9 +268,9 @@ def featureExtraction(url):
 def home():
   return jsonify(hello='world')
 
-@app.route('/post',methods=['POST'])
+@app.route('/post/<string:url>',methods=['POST'])
 def predict():
-  url=request.form['URL']
+  #url=request.form['URL']
   dataPhish=0
   if checkCSV(url)==0:
     dataPhish=0
