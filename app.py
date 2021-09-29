@@ -17,6 +17,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from csv import reader
 from flask_cors import CORS
+from flask import jsonify
 
 app = Flask(__name__)
 CORS(app)
@@ -265,7 +266,7 @@ def featureExtraction(url):
 
 @app.route('/',methods=["GET","POST"])
 def home():
-    return "Hello World"
+  return jsonify(hello='world')
 
 @app.route('/post',methods=['POST'])
 def predict():
@@ -276,7 +277,7 @@ def predict():
   else:
     dataPhish=1
   if dataPhish==0:
-    return "0"
+    return jsonify(prediction='Safe')
   else:
     features=featureExtraction(url)
   if features.count(0)==15 or features.count(0)==14:
