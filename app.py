@@ -269,14 +269,15 @@ def home():
 
 @app.route('/post',methods=['POST'])
 def predict():
-  url=request.form['URL']
+  content=request.json
+  url=content["URL"]
   dataPhish=0
   if checkCSV(url)==0:
     dataPhish=0
   else:
     dataPhish=1
   if dataPhish==0:
-    return "0"
+    return jsonify(0)
   else:
     features=featureExtraction(url)
   if features.count(0)==15 or features.count(0)==14:
@@ -284,8 +285,8 @@ def predict():
   else:
     prediction = model.predict([features])
   if prediction==1 and dataPhish==1:
-    return "-1"
+    return jsonify("-1")
   else:
-    return "1"
+    return jsonify("1")
 if __name__ == "__main__":
     app.run(debug=True)
