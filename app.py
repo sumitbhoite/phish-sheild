@@ -285,8 +285,8 @@ def predict():
   else:
     prediction = model.predict([features])
   if prediction==1 and dataPhish==1:
-    return "-1"
+    return jsonify(prediction='Un-Safe URL')
   else:
-    return "1"
+    return jsonify(prediction='Not recognized')
 if __name__ == "__main__":
     app.run(debug=True)
