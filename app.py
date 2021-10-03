@@ -17,10 +17,13 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from csv import reader
 from flask_cors import CORS
+from os.path import dirname, join
 
 app = Flask(__name__)
 CORS(app)
-model = pickle.load(open('SVM_Model.pkl', 'rb'))
+current_dir = dirname(__file__)
+model_path = join(current_dir, "./SVM_Model.pkl")
+model = pickle.load(open(model_path, 'rb'))
 
 # 2.Checks for IP address in URL (Have_IP)
 def havingIP(url):
@@ -212,7 +215,9 @@ def checkCSV(url):
     checkURL=urlparse(url).netloc
   except:
     return 1
-  with open('Web_Scrapped_websites.csv', 'r') as read_obj:
+  current_dir = dirname(__file__)
+  file_path = join(current_dir, "./Web_Scrapped_websites.csv")
+  with open(file_path, 'r') as read_obj:
     csv_reader = reader(read_obj)
     for row in csv_reader:
         if row[0]==checkURL:
@@ -267,17 +272,17 @@ def featureExtraction(url):
 def home():
     return "Hello World"
 
-@app.route('/post',methods=['POST'])
+@app.route('/post')
 def predict():
-  content=request.json
-  url=content["URL"]
+  url=str(request.args.get('URL'))
+  #return jsonify(url)
   dataPhish=0
   if checkCSV(url)==0:
     dataPhish=0
   else:
     dataPhish=1
   if dataPhish==0:
-    return jsonify(0)
+    return jsonify(1)
   else:
     features=featureExtraction(url)
   if features.count(0)==15 or features.count(0)==14:
@@ -287,6 +292,6 @@ def predict():
   if prediction==1 and dataPhish==1:
     return jsonify("-1")
   else:
-    return jsonify("1")
+    return jsonify("0")
 if __name__ == "__main__":
     app.run(debug=True)
