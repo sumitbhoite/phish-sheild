@@ -203,7 +203,7 @@ def forwarding(response):
   if response == "":
     return 1
   else:
-    if len(response.history) <= 2:
+    if len(response.history) <= 5:
       return 0
     else:
       return 1
@@ -211,20 +211,19 @@ def forwarding(response):
 #16. Extra feature checks url exists in popular websites data
 def checkCSV(url):
   flag=0
-  try:
-    checkURL=urlparse(url).netloc
-  except:
-    return 1
+  checkURL=urlparse(url).netloc
   current_dir = dirname(__file__)
   file_path = join(current_dir, "./Web_Scrapped_websites.csv")
   with open(file_path, 'r') as read_obj:
     csv_reader = reader(read_obj)
     for row in csv_reader:
-        if row[0]==checkURL:
-            flag=0
-            break
-        else:
-            flag=1
+      # print(row[0])
+      if row[0]==checkURL:
+        print(row[0])
+        flag=0
+        break
+      else:
+        flag=1
   if flag==0:
       return 0
   else:
@@ -274,7 +273,9 @@ def home():
 
 @app.route('/post',methods=['POST'])
 def predict():
-  url=str(request.args.get('URL'))
+  # url=str(request.args.get('URL'))
+  url = request.form["URL"]
+  print(url)
   #return jsonify(url)
   dataPhish=0
   if checkCSV(url)==0:
@@ -282,7 +283,7 @@ def predict():
   else:
     dataPhish=1
   if dataPhish==0:
-    return jsonify(1)
+    return jsonify("1")
   else:
     features=featureExtraction(url)
   if features.count(0)==15 or features.count(0)==14:
